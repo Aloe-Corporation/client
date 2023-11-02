@@ -1,0 +1,8 @@
+version: '3'
+services:
+  test_client_api_mocking:
+    image: harbor.samdoc.local/mocking/mocking_client:dev
+    container_name: test_client_api_mocking
+    restart: always
+    ports:
+      - 18080:8080

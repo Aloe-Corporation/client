@@ -1,6 +1,6 @@
 # Client
 
-The client module defines a supercharged HTTP Client that simplify HTTP requests. It aims to minify the code repetition
+The client module defines a supercharged HTTP Client that simplifies HTTP requests. It aims to minify the code repetition
 that `net/http` module creates when dealing with multiple API calls.
 
 This project has been developped by the [Aloe](https://www.aloe-corp.com/) team and is now open source.

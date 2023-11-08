@@ -17,13 +17,31 @@ The client module provides:
 - Infinite compatibility because it embed a native `net/http` client
 - Proxy of instanciated clients
 
+## Concept
+
+### One client by target
+
+One of the main concept is that one client is bound to one API. We do this to simplify HTTP calls by only setting the endpoint path as function parameter and not the base URL + the path.
+
+### Status code range
+
+To ease the error checking we've defined a `StatusCodeRange` struct.
+
+```go
+type StatusCodeRange struct {
+	Min int // Lower bound
+	Max int // Max bound excluded
+}
+```
+All status code received from target API within the range will be considered as valid response.
+
 
 ## Usage
 
 ### Instanciation
 
-Use the `Conf struct` then call the `FactoryConnector(conf Conf)` function to instanciates a new HTTP connector.
-Don't forget to call the  *Connector.Ping(t int) method to verify that the target API is availble.
+Use the `Conf` struct then call the `FactoryConnector(conf Conf)` function to instanciate a new HTTP connector.
+Don't forget to call the  `*Connector.Ping(t int)`` method to verify that the target API is availble.
 
 ```go
 conf := Conf{

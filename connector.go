@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -122,18 +121,11 @@ func (c *Connector) Ping(t int) error {
 
 	timeout := time.After(time.Duration(t) * time.Second)
 
-	msg := struct {
-		Service   string `json:"service"`
-		Copyright string `json:"copyright"`
-	}{}
-
 	for {
 		select {
 		case <-ticker.C:
-			data, httpErr := c.SimpleGet(c.pingEndpoint)
-			jsonErr := json.Unmarshal(data, &msg)
-
-			if httpErr == nil && jsonErr == nil && msg.Service != "" {
+			_, err := c.SimpleGet(c.pingEndpoint)
+			if err == nil {
 				return nil
 			}
 

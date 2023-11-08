@@ -27,7 +27,7 @@ func TestConnector_SimpleGet(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/get",
@@ -38,7 +38,7 @@ func TestConnector_SimpleGet(t *testing.T) {
 		{
 			name: "Fail case: wrong path",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/wrong",
@@ -86,7 +86,7 @@ func TestConnector_SimplePost(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/post",
@@ -98,7 +98,7 @@ func TestConnector_SimplePost(t *testing.T) {
 		{
 			name: "Fail case: wrong path",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/wrong",
@@ -146,7 +146,7 @@ func TestConnector_SimplePut(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/put",
@@ -158,7 +158,7 @@ func TestConnector_SimplePut(t *testing.T) {
 		{
 			name: "Fail case: wrong path",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/wrong",
@@ -206,7 +206,7 @@ func TestConnector_SimpleDelete(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/delete",
@@ -218,7 +218,7 @@ func TestConnector_SimpleDelete(t *testing.T) {
 		{
 			name: "Fail case: wrong path",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				path: "/wrong",
@@ -267,7 +267,7 @@ func TestConnector_SimpleDo(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "POST",
@@ -280,7 +280,7 @@ func TestConnector_SimpleDo(t *testing.T) {
 		{
 			name: "Fail case: wrong path",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "POST",
@@ -293,7 +293,7 @@ func TestConnector_SimpleDo(t *testing.T) {
 		{
 			name: "Fail case: wrong http method",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "GET",
@@ -345,7 +345,7 @@ func TestConnector_DoWithHeader(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "GET",
@@ -362,7 +362,7 @@ func TestConnector_DoWithHeader(t *testing.T) {
 		{
 			name: "Fail case: wrong header",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "GET",
@@ -379,7 +379,7 @@ func TestConnector_DoWithHeader(t *testing.T) {
 		{
 			name: "Fail case: no header, traget endpoint is waiting for header to be set",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method:             "GET",
@@ -393,7 +393,7 @@ func TestConnector_DoWithHeader(t *testing.T) {
 		{
 			name: "Fail case: forbidden char in method",
 			fields: fields{
-				Client: FactoryHttpClient(),
+				Client: FactoryHTTPClient(),
 			},
 			args: args{
 				method: "GE\tT",
@@ -445,7 +445,7 @@ func TestConnector_Ping(t *testing.T) {
 		{
 			name: "Success case",
 			fields: fields{
-				Client:       FactoryHttpClient(),
+				Client:       FactoryHTTPClient(),
 				pingEndpoint: "/",
 			},
 			args: args{
@@ -456,7 +456,7 @@ func TestConnector_Ping(t *testing.T) {
 		{
 			name: "Fail case: wrong ping endpoint",
 			fields: fields{
-				Client:       FactoryHttpClient(),
+				Client:       FactoryHTTPClient(),
 				pingEndpoint: "/wrong",
 			},
 			args: args{

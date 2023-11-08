@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 )
@@ -9,9 +10,11 @@ import (
 // The ping url is "/".
 func GetPingEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" || r.Method != "GET" {
+		if r.URL.Path != "/" || r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Status not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -22,26 +25,17 @@ func GetPingEndpoint() *httptest.Server {
 // The only valid path is "/get".
 func GetEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/get" || r.Method != "GET" {
+		if r.URL.Path != "/get" || r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This is data"))
-	}))
-}
-
-// GetEndpointWithoutBody is a HTTP mock endpoint to simulate a GET request that responds without data.
-// The only valid path is "/get".
-func GetEndpointWithoutBody() *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/get" || r.Method != "GET" {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
-			return
+		if _, err := w.Write([]byte("This is data")); err != nil {
+			fmt.Println("can't write in response writer: ", err.Error())
 		}
-		w.WriteHeader(http.StatusOK)
 	}))
 }
 
@@ -51,19 +45,25 @@ func GetEndpointWithoutBody() *httptest.Server {
 // The only valid path is "/get".
 func GetEndpointWithHeader() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/get" || r.Method != "GET" {
+		if r.URL.Path != "/get" || r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 
 		if r.Header.Get("test-header") == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Missing test-header Header in request."))
+			if _, err := w.Write([]byte("Missing test-header Header in request.")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This is data"))
+		if _, err := w.Write([]byte("This is data")); err != nil {
+			fmt.Println("can't write in response writer: ", err.Error())
+		}
 	}))
 }
 
@@ -73,11 +73,15 @@ func PostEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/post" || r.Method != "POST" {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This is data"))
+		if _, err := w.Write([]byte("This is data")); err != nil {
+			fmt.Println("can't write in response writer: ", err.Error())
+		}
 	}))
 }
 
@@ -87,11 +91,15 @@ func PutEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/put" || r.Method != "PUT" {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This is data"))
+		if _, err := w.Write([]byte("This is data")); err != nil {
+			fmt.Println("can't write in response writer: ", err.Error())
+		}
 	}))
 }
 
@@ -101,10 +109,14 @@ func DeleteEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/delete" || r.Method != "DELETE" {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Not found"))
+			if _, err := w.Write([]byte("Status not found")); err != nil {
+				fmt.Println("can't write in response writer: ", err.Error())
+			}
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This is data"))
+		if _, err := w.Write([]byte("This is data")); err != nil {
+			fmt.Println("can't write in response writer: ", err.Error())
+		}
 	}))
 }

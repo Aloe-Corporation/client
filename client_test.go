@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestProxyFactoryHttpClient(t *testing.T) {
+func TestProxyFactoryHTTPClient(t *testing.T) {
 	type args struct {
 		key string
 	}
@@ -30,18 +30,18 @@ func TestProxyFactoryHttpClient(t *testing.T) {
 	}
 
 	// Instanciate a client before test run
-	instanciatedClient["c0"] = FactoryHttpClient()
+	instanciatedClient["c0"] = FactoryHTTPClient()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ProxyFactoryHttpClient(tt.args.key)
+			got := ProxyFactoryHTTPClient(tt.args.key)
 			if tt.newClient {
 				if got == instanciatedClient["c0"] {
-					t.Errorf("ProxyFactoryHttpClient() = %v, should be a new client but was equal to already instanciated one.", got)
+					t.Errorf("ProxyFactoryHTTPClient() = %v, should be a new client but was equal to already instanciated one.", got)
 				}
 			} else {
 				if got == nil {
-					t.Errorf("ProxyFactoryHttpClient() = %v, client should not be nil", got)
+					t.Errorf("ProxyFactoryHTTPClient() = %v, client should not be nil", got)
 				}
 			}
 		})

@@ -5,10 +5,6 @@ import (
 	"net/http/httptest"
 )
 
-var (
-	PingEndpointServerURL = "http://server.com"
-)
-
 func GetPingEndpoint() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" || r.Method != "GET" {

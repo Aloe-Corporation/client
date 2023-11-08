@@ -41,43 +41,43 @@ type Connector struct {
 // SimpleGet allow to use Connector.SimpleDo easily.
 // You have to specify the path and if the response have a body, if not []byte will be not nil and error will be nil.
 // The StatusCodeRange use in Connector.DoWithStatusCheck will be DefautStatusRange [200,400[.
-func (c *Connector) SimpleGet(path string, hasResponseBody bool) ([]byte, error) {
-	return c.SimpleDo(http.MethodGet, path, nil, hasResponseBody)
+func (c *Connector) SimpleGet(path string) ([]byte, error) {
+	return c.SimpleDo(http.MethodGet, path, nil)
 }
 
 // SimplePost allow to use Connector.SimpleDo easily.
 // You have to specify the path, the request body and if the response have a body, if not []byte will be not nil and error will be nil.
 // The StatusCodeRange use in Connector.DoWithStatusCheck will be DefautStatusRange [200,400[.
-func (c *Connector) SimplePost(path string, body io.Reader, hasResponseBody bool) ([]byte, error) {
-	return c.SimpleDo(http.MethodPost, path, body, hasResponseBody)
+func (c *Connector) SimplePost(path string, body io.Reader) ([]byte, error) {
+	return c.SimpleDo(http.MethodPost, path, body)
 }
 
 // SimplePut allow to use Connector.SimpleDo easily.
 // You have to specify the path, the request body and if the response have a body, if not []byte will be not nil and error will be nil.
 // The StatusCodeRange use in Connector.DoWithStatusCheck will be DefautStatusRange [200,400[.
-func (c *Connector) SimplePut(path string, body io.Reader, hasResponseBody bool) ([]byte, error) {
-	return c.SimpleDo(http.MethodPut, path, body, hasResponseBody)
+func (c *Connector) SimplePut(path string, body io.Reader) ([]byte, error) {
+	return c.SimpleDo(http.MethodPut, path, body)
 }
 
 // SimpleDelete allow to use Connector.SimpleDo easily.
 // You have to specify the path, the request body and if the response have a body, if not []byte will be not nil and error will be nil.
 // The StatusCodeRange use in Connector.DoWithStatusCheck will be DefautStatusRange [200,400[.
-func (c *Connector) SimpleDelete(path string, body io.Reader, hasResponseBody bool) ([]byte, error) {
-	return c.SimpleDo(http.MethodDelete, path, body, hasResponseBody)
+func (c *Connector) SimpleDelete(path string, body io.Reader) ([]byte, error) {
+	return c.SimpleDo(http.MethodDelete, path, body)
 }
 
 // SimpleDo allow to use Connector.DoWithHeader easily.
 // You have to specify the method, the path, the body and if the response have a body, if not []byte will be not nil and error will be nil.
 // The StatusCodeRange use in Connector.DoWithStatusCheck will be DefautStatusRange [200,400[.
-func (c *Connector) SimpleDo(method, path string, body io.Reader, hasResponseBody bool) ([]byte, error) {
-	return c.DoWithHeader(method, path, nil, body, DefaultStatusRange, hasResponseBody)
+func (c *Connector) SimpleDo(method, path string, body io.Reader) ([]byte, error) {
+	return c.DoWithHeader(method, path, nil, body, DefaultStatusRange)
 }
 
 // DoWithHeader allow to use Connector.DoWithStatusCheck easily.
 // You have to specify the method, the path, the header, the body, the excepted status range.
 // The excepted status range Min will be included and Max will be excluded
 // You have to specify if the response have a body if not []byte will be not nil and error will be nil.
-func (c *Connector) DoWithHeader(method, path string, header *http.Header, body io.Reader, exceptedStatusCode StatusCodeRange, hasResponseBody bool) ([]byte, error) {
+func (c *Connector) DoWithHeader(method, path string, header *http.Header, body io.Reader, exceptedStatusCode StatusCodeRange) ([]byte, error) {
 	req, err := http.NewRequestWithContext(context.Background(), method, c.URL+path, body)
 	if err != nil {
 		return nil, fmt.Errorf("can't create the request : %w", err)
@@ -87,14 +87,14 @@ func (c *Connector) DoWithHeader(method, path string, header *http.Header, body 
 		req.Header = *header
 	}
 
-	return c.DoWithStatusCheck(req, exceptedStatusCode, hasResponseBody)
+	return c.DoWithStatusCheck(req, exceptedStatusCode)
 }
 
 // DoWithStatusCheck a HTTP request with the given request.
 // The caller should use Connector.URL as base URL when building the request.
 // You have to provide a status code range to validate if the request was succesfull.
 // You have to specify if the response has a body, if not []byte will be not nil and error will be nil.
-func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode StatusCodeRange, hasResponseBody bool) ([]byte, error) {
+func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode StatusCodeRange) ([]byte, error) {
 	response, err := c.Client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to execute HTTP request: %w", err)
@@ -105,12 +105,9 @@ func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode Stat
 		return nil, &FailRequestError{Code: response.StatusCode}
 	}
 
-	data := make([]byte, 0)
-	if hasResponseBody {
-		data, err = io.ReadAll(response.Body)
-		if err != nil {
-			return nil, fmt.Errorf("can't read response body : %w", err)
-		}
+	data, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("can't read response body : %w", err)
 	}
 
 	if err := response.Body.Close(); err != nil {
@@ -136,7 +133,7 @@ func (c *Connector) Ping(t int) error {
 	for {
 		select {
 		case <-ticker.C:
-			data, httpErr := c.SimpleGet("/", true)
+			data, httpErr := c.SimpleGet("/")
 			jsonErr := json.Unmarshal(data, &msg)
 
 			if httpErr == nil && jsonErr == nil && msg.Service != "" {

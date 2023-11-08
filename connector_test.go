@@ -18,13 +18,12 @@ const (
 )
 
 type doTestData struct {
-	Conf            Conf
-	Verbe, Path     string
-	Header          *http.Header
-	Body            io.Reader
-	HasResponseBody bool
-	ShouldFail      bool
-	ExpectedErr     string
+	Conf        Conf
+	Verbe, Path string
+	Header      *http.Header
+	Body        io.Reader
+	ShouldFail  bool
+	ExpectedErr string
 }
 
 var (
@@ -33,9 +32,8 @@ var (
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Path:            "/get",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Path:       "/get",
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -62,15 +60,13 @@ func TestSimpleGet(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.SimpleGet(testCase.Path, testCase.HasResponseBody)
+			data, err := c.SimpleGet(testCase.Path)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -82,9 +78,8 @@ var (
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Path:            "/post",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Path:       "/post",
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -111,15 +106,13 @@ func TestSimplePost(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.SimplePost(testCase.Path, testCase.Body, testCase.HasResponseBody)
+			data, err := c.SimplePost(testCase.Path, testCase.Body)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -131,9 +124,8 @@ var (
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Path:            "/put",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Path:       "/put",
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -160,15 +152,13 @@ func TestSimplePut(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.SimplePut(testCase.Path, testCase.Body, testCase.HasResponseBody)
+			data, err := c.SimplePut(testCase.Path, testCase.Body)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -180,9 +170,8 @@ var (
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Path:            "/delete",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Path:       "/delete",
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -209,15 +198,13 @@ func TestSimpleDelete(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.SimpleDelete(testCase.Path, testCase.Body, testCase.HasResponseBody)
+			data, err := c.SimpleDelete(testCase.Path, testCase.Body)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -229,37 +216,33 @@ var (
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodGet,
-			Path:            "/get",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Verbe:      http.MethodGet,
+			Path:       "/get",
+			ShouldFail: false,
 		},
 		{ // success
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodPost,
-			Path:            "/post",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Verbe:      http.MethodPost,
+			Path:       "/post",
+			ShouldFail: false,
 		},
 		{ // success
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodPut,
-			Path:            "/put",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Verbe:      http.MethodPut,
+			Path:       "/put",
+			ShouldFail: false,
 		},
 		{ // success
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodDelete,
-			Path:            "/delete",
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Verbe:      http.MethodDelete,
+			Path:       "/delete",
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -288,15 +271,13 @@ func TestSimpleDo(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.SimpleDo(testCase.Verbe, testCase.Path, testCase.Body, testCase.HasResponseBody)
+			data, err := c.SimpleDo(testCase.Verbe, testCase.Path, testCase.Body)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -313,19 +294,17 @@ var (
 			Header: &http.Header{
 				"foo": []string{"bar"},
 			},
-			HasResponseBody: true,
-			ShouldFail:      false,
+			ShouldFail: false,
 		},
 		{ // fail case default header
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodGet,
-			Path:            "/header",
-			Header:          &http.Header{},
-			HasResponseBody: true,
-			ShouldFail:      true,
-			ExpectedErr:     "400 fail request",
+			Verbe:       http.MethodGet,
+			Path:        "/header",
+			Header:      &http.Header{},
+			ShouldFail:  true,
+			ExpectedErr: "400 fail request",
 		},
 		{ // fail case empty header
 			Conf: Conf{
@@ -336,20 +315,18 @@ var (
 			Header: &http.Header{
 				"foo": []string{},
 			},
-			HasResponseBody: true,
-			ShouldFail:      true,
-			ExpectedErr:     "400 fail request",
+			ShouldFail:  true,
+			ExpectedErr: "400 fail request",
 		},
 		{ // fail case no header
 			Conf: Conf{
 				URL: "http://localhost:18080",
 			},
-			Verbe:           http.MethodGet,
-			Path:            "/header",
-			Header:          nil,
-			HasResponseBody: true,
-			ShouldFail:      true,
-			ExpectedErr:     "400 fail request",
+			Verbe:       http.MethodGet,
+			Path:        "/header",
+			Header:      nil,
+			ShouldFail:  true,
+			ExpectedErr: "400 fail request",
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
@@ -378,15 +355,13 @@ func TestConnectorDoWithHeader(t *testing.T) {
 				Client: http.DefaultClient,
 			}
 
-			data, err := c.DoWithHeader(testCase.Verbe, testCase.Path, testCase.Header, testCase.Body, DefaultStatusRange, testCase.HasResponseBody)
+			data, err := c.DoWithHeader(testCase.Verbe, testCase.Path, testCase.Header, testCase.Body, DefaultStatusRange)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}
@@ -398,22 +373,20 @@ var (
 			Conf: Conf{
 				URL: "http://google.com",
 			},
-			Verbe:           http.MethodGet,
-			Path:            "",
-			Body:            nil,
-			HasResponseBody: true,
-			ShouldFail:      false,
+			Verbe:      http.MethodGet,
+			Path:       "",
+			Body:       nil,
+			ShouldFail: false,
 		},
 		{ // fail : invalid URL
 			Conf: Conf{
 				URL: "http://test.test",
 			},
-			Verbe:           http.MethodGet,
-			Path:            "",
-			Body:            nil,
-			HasResponseBody: false,
-			ShouldFail:      true,
-			ExpectedErr:     "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
+			Verbe:       http.MethodGet,
+			Path:        "",
+			Body:        nil,
+			ShouldFail:  true,
+			ExpectedErr: "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
 		},
 	}
 )
@@ -429,15 +402,13 @@ func TestDoWithStatusCheck(t *testing.T) {
 			req, err := http.NewRequest(testCase.Verbe, c.URL+testCase.Path, testCase.Body)
 			assert.NoError(t, err)
 
-			data, err := c.DoWithStatusCheck(req, DefaultStatusRange, testCase.HasResponseBody)
+			data, err := c.DoWithStatusCheck(req, DefaultStatusRange)
 			if testCase.ShouldFail {
 				assert.Error(t, err)
 				assert.Equal(t, testCase.ExpectedErr, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if testCase.HasResponseBody {
-					assert.True(t, len(data) > 0)
-				}
+				assert.True(t, len(data) > 0)
 			}
 		})
 	}

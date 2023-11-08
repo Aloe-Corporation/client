@@ -1,487 +1,507 @@
 package client
 
 import (
-	"fmt"
+	"bytes"
 	"io"
 	"net/http"
-	"os"
-	"strconv"
+	"reflect"
 	"testing"
 
 	"github.com/Aloe-Corporation/client/test"
-	"github.com/Aloe-Corporation/docker"
-	"github.com/stretchr/testify/assert"
 )
 
-const (
-	PING_TIMEOUT = 10
-)
-
-type doTestData struct {
-	Conf        Conf
-	Verbe, Path string
-	Header      *http.Header
-	Body        io.Reader
-	ShouldFail  bool
-	ExpectedErr string
-}
-
-var (
-	simpleGetTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_SimpleGet(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Path:       "/get",
-			ShouldFail: false,
+			args: args{
+				path: "/get",
+			},
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+		{
+			name: "Fail case: wrong path",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
+			args: args{
+				path: "/wrong",
 			},
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.GetEndpoint()
+			defer server.Close()
 
-func TestSimpleGet(t *testing.T) {
-	for i, testCase := range simpleGetTestCases {
-		t.Run("TestSimpleGet : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.SimpleGet(testCase.Path)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.SimpleGet(tt.args.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.SimpleGet() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.SimpleGet() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	simplePostTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_SimplePost(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		path string
+		body io.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Path:       "/post",
-			ShouldFail: false,
+			args: args{
+				path: "/post",
+				body: bytes.NewReader([]byte("data")),
+			},
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+		{
+			name: "Fail case: wrong path",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Post \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
+			args: args{
+				path: "/wrong",
+				body: bytes.NewReader([]byte("data")),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
-
-func TestSimplePost(t *testing.T) {
-	for i, testCase := range simplePostTestCases {
-		t.Run("TestSimplePost : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.PostEndpoint()
+			defer server.Close()
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.SimplePost(testCase.Path, testCase.Body)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.SimplePost(tt.args.path, tt.args.body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.SimplePost() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.SimplePost() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	simplePutTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_SimplePut(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		path string
+		body io.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Path:       "/put",
-			ShouldFail: false,
+			args: args{
+				path: "/put",
+				body: bytes.NewReader([]byte("data")),
+			},
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+		{
+			name: "Fail case: wrong path",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Put \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
+			args: args{
+				path: "/wrong",
+				body: bytes.NewReader([]byte("data")),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
-
-func TestSimplePut(t *testing.T) {
-	for i, testCase := range simplePutTestCases {
-		t.Run("TestSimplePut : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.PutEndpoint()
+			defer server.Close()
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.SimplePut(testCase.Path, testCase.Body)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.SimplePut(tt.args.path, tt.args.body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.SimplePut() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.SimplePut() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	simpleDeleteTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_SimpleDelete(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		path string
+		body io.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Path:       "/delete",
-			ShouldFail: false,
+			args: args{
+				path: "/delete",
+				body: bytes.NewReader([]byte("data")),
+			},
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+		{
+			name: "Fail case: wrong path",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Delete \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
+			args: args{
+				path: "/wrong",
+				body: bytes.NewReader([]byte("data")),
 			},
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
-
-func TestSimpleDelete(t *testing.T) {
-	for i, testCase := range simpleDeleteTestCases {
-		t.Run("TestSimpleDelete : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.DeleteEndpoint()
+			defer server.Close()
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.SimpleDelete(testCase.Path, testCase.Body)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.SimpleDelete(tt.args.path, tt.args.body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.SimpleDelete() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.SimpleDelete() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	simpleDoTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_SimpleDo(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		method string
+		path   string
+		body   io.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe:      http.MethodGet,
-			Path:       "/get",
-			ShouldFail: false,
+			args: args{
+				method: "POST",
+				path:   "/post",
+				body:   bytes.NewReader([]byte("data")),
+			},
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+		{
+			name: "Fail case: wrong path",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe:      http.MethodPost,
-			Path:       "/post",
-			ShouldFail: false,
+			args: args{
+				method: "POST",
+				path:   "/wrong",
+				body:   bytes.NewReader([]byte("data")),
+			},
+			want:    nil,
+			wantErr: true,
 		},
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+		{
+			name: "Fail case: wrong http method",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe:      http.MethodPut,
-			Path:       "/put",
-			ShouldFail: false,
-		},
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+			args: args{
+				method: "GET",
+				path:   "/post",
+				body:   bytes.NewReader([]byte("data")),
 			},
-			Verbe:      http.MethodDelete,
-			Path:       "/delete",
-			ShouldFail: false,
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
-			},
-			Verbe:       http.MethodGet,
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
-			},
-			Verbe:       http.MethodGet,
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
-
-func TestSimpleDo(t *testing.T) {
-	for i, testCase := range simpleDoTestCases {
-		t.Run("TestSimpleDo : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.PostEndpoint()
+			defer server.Close()
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.SimpleDo(testCase.Verbe, testCase.Path, testCase.Body)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.SimpleDo(tt.args.method, tt.args.path, tt.args.body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.SimpleDo() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.SimpleDo() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	connectorDoWithHeaderTestCases = [...]doTestData{
-		{ // success
-			Conf: Conf{
-				URL: "http://localhost:18080",
+func TestConnector_DoWithHeader(t *testing.T) {
+	type fields struct {
+		Client *http.Client
+	}
+	type args struct {
+		method             string
+		path               string
+		header             *http.Header
+		body               io.Reader
+		exceptedStatusCode StatusCodeRange
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe: http.MethodGet,
-			Path:  "/header",
-			Header: &http.Header{
-				"foo": []string{"bar"},
+			args: args{
+				method: "GET",
+				path:   "/get",
+				body:   bytes.NewReader([]byte("data")),
+				header: &http.Header{
+					"test-header": []string{"value"},
+				},
+				exceptedStatusCode: DefaultStatusRange,
 			},
-			ShouldFail: false,
+			want:    []byte("This is data"),
+			wantErr: false,
 		},
-		{ // fail case default header
-			Conf: Conf{
-				URL: "http://localhost:18080",
+		{
+			name: "Fail case: wrong header",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe:       http.MethodGet,
-			Path:        "/header",
-			Header:      &http.Header{},
-			ShouldFail:  true,
-			ExpectedErr: "400 fail request",
+			args: args{
+				method: "GET",
+				path:   "/get",
+				body:   bytes.NewReader([]byte("data")),
+				header: &http.Header{
+					"unknown": []string{"value"},
+				},
+				exceptedStatusCode: DefaultStatusRange,
+			},
+			want:    nil,
+			wantErr: true,
 		},
-		{ // fail case empty header
-			Conf: Conf{
-				URL: "http://localhost:18080",
+		{
+			name: "Fail case: no header, traget endpoint is waiting for header to be set",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe: http.MethodGet,
-			Path:  "/header",
-			Header: &http.Header{
-				"foo": []string{},
+			args: args{
+				method:             "GET",
+				path:               "/get",
+				body:               bytes.NewReader([]byte("data")),
+				exceptedStatusCode: DefaultStatusRange,
 			},
-			ShouldFail:  true,
-			ExpectedErr: "400 fail request",
+			want:    nil,
+			wantErr: true,
 		},
-		{ // fail case no header
-			Conf: Conf{
-				URL: "http://localhost:18080",
+		{
+			name: "Fail case: forbidden char in method",
+			fields: fields{
+				Client: FactoryHttpClient(),
 			},
-			Verbe:       http.MethodGet,
-			Path:        "/header",
-			Header:      nil,
-			ShouldFail:  true,
-			ExpectedErr: "400 fail request",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+			args: args{
+				method: "GE\tT",
+				path:   "/get",
+				body:   bytes.NewReader([]byte("data")),
+				header: &http.Header{
+					"test-header": []string{"value"},
+				},
+				exceptedStatusCode: DefaultStatusRange,
 			},
-			Verbe:       http.MethodGet,
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
-		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://goog\tle.com",
-			},
-			Verbe:       http.MethodGet,
-			ShouldFail:  true,
-			ExpectedErr: "can't create the request : parse \"http://goog\\tle.com\": net/url: invalid control character in URL",
+			want:    nil,
+			wantErr: true,
 		},
 	}
-)
-
-func TestConnectorDoWithHeader(t *testing.T) {
-	for i, testCase := range connectorDoWithHeaderTestCases {
-		t.Run("TestConnectorDoWithHeader : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.GetEndpointWithHeader()
+			defer server.Close()
+			c := &Connector{
+				Client: tt.fields.Client,
+				URL:    server.URL,
 			}
-
-			data, err := c.DoWithHeader(testCase.Verbe, testCase.Path, testCase.Header, testCase.Body, DefaultStatusRange)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			got, err := c.DoWithHeader(tt.args.method, tt.args.path, tt.args.header, tt.args.body, tt.args.exceptedStatusCode)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Connector.DoWithHeader() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Connector.DoWithHeader() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-var (
-	doWithStatusCheckTestCases = [...]doTestData{
-		{ // success : ping google.com
-			Conf: Conf{
-				URL: "http://google.com",
+func TestConnector_Ping(t *testing.T) {
+	type fields struct {
+		Client       *http.Client
+		pingEndpoint string
+	}
+	type args struct {
+		t int
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Success case",
+			fields: fields{
+				Client:       FactoryHttpClient(),
+				pingEndpoint: "/",
 			},
-			Verbe:      http.MethodGet,
-			Path:       "",
-			Body:       nil,
-			ShouldFail: false,
+			args: args{
+				t: 1,
+			},
+			wantErr: false,
 		},
-		{ // fail : invalid URL
-			Conf: Conf{
-				URL: "http://test.test",
+		{
+			name: "Fail case: wrong ping endpoint",
+			fields: fields{
+				Client:       FactoryHttpClient(),
+				pingEndpoint: "/wrong",
 			},
-			Verbe:       http.MethodGet,
-			Path:        "",
-			Body:        nil,
-			ShouldFail:  true,
-			ExpectedErr: "fail to execute HTTP request: Get \"http://test.test\": dial tcp: lookup test.test: no such host",
+			args: args{
+				t: 1,
+			},
+			wantErr: true,
 		},
 	}
-)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := test.GetPingEndpoint()
+			defer server.Close()
 
-func TestDoWithStatusCheck(t *testing.T) {
-	for i, testCase := range doWithStatusCheckTestCases {
-		t.Run("TestDoWithStatusCheck : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
+			c := &Connector{
+				Client:       tt.fields.Client,
+				URL:          server.URL,
+				pingEndpoint: tt.fields.pingEndpoint,
 			}
 
-			req, err := http.NewRequest(testCase.Verbe, c.URL+testCase.Path, testCase.Body)
-			assert.NoError(t, err)
-
-			data, err := c.DoWithStatusCheck(req, DefaultStatusRange)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-				assert.Equal(t, testCase.ExpectedErr, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, len(data) > 0)
+			if err := c.Ping(tt.args.t); (err != nil) != tt.wantErr {
+				t.Errorf("Connector.Ping() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
-}
-
-type ConnectorPingTestData struct {
-	Conf       Conf
-	ShouldFail bool
-}
-
-var connectorPingTestCases = [...]ConnectorPingTestData{
-	{ // Success
-		Conf: Conf{
-			URL: "http://localhost:18080",
-		},
-		ShouldFail: false,
-	},
-	{ // Fail to ping
-		Conf: Conf{
-			URL: "http://localhost:666",
-		},
-		ShouldFail: true,
-	},
-}
-
-func TestConnectorPing(t *testing.T) {
-	for i, testCase := range connectorPingTestCases {
-		t.Run("TestConnectorPing : "+strconv.Itoa(i), func(t *testing.T) {
-			c := Connector{
-				URL:    testCase.Conf.URL,
-				Client: http.DefaultClient,
-			}
-
-			err := c.Ping(PING_TIMEOUT)
-			if testCase.ShouldFail {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
-var factoryConnectorTestsCases = [...]Conf{
-	{
-		URL: "http://localhost:8080",
-	},
 }
 
 func TestFactoryConnector(t *testing.T) {
-	for i, testCase := range factoryConnectorTestsCases {
-		t.Run("TestFactoryConnector : "+strconv.Itoa(i), func(t *testing.T) {
-			result := FactoryConnector(testCase)
-			assert.NotNil(t, result)
+	type args struct {
+		config Conf
+	}
+	tests := []struct {
+		name string
+		args args
+		want *Connector
+	}{
+		{
+			name: "Success case",
+			args: args{Conf{}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FactoryConnector(tt.args.config); got == nil {
+				t.Errorf("FactoryConnector() = %v, should not be nil", got)
+			}
 		})
 	}
-}
-
-func TestMain(m *testing.M) {
-	// Up docker-compose
-	dc := docker.Compose{PathFile: test.DockerCompose}
-	err := dc.Up()
-	if err != nil {
-		_ = dc.Down()
-		panic(fmt.Errorf("fail to up docker-compose: %w", err))
-	}
-
-	// Run
-	r := m.Run()
-
-	// Down docker-compose
-	if err := dc.Down(); err != nil {
-		panic(fmt.Errorf("fail to down docker-compose: %w", err))
-	}
-	os.Exit(r)
 }

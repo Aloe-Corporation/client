@@ -20,11 +20,16 @@ var (
 )
 
 type FailRequestError struct {
-	Code int
+	Code         int
+	ResponseBody []byte
 }
 
 func (e *FailRequestError) Error() string {
-	return fmt.Sprintf("%d fail request", e.Code)
+	responseBodyAsStr := string(e.ResponseBody)
+	if responseBodyAsStr == "" {
+		return fmt.Sprintf("%d fail request", e.Code)
+	}
+	return fmt.Sprintf("%d fail request, error message: %s", e.Code, responseBodyAsStr)
 }
 
 type StatusCodeRange struct {
@@ -101,13 +106,13 @@ func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode Stat
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode < exceptedStatusCode.Min || response.StatusCode >= exceptedStatusCode.Max {
-		return nil, &FailRequestError{Code: response.StatusCode}
-	}
-
 	data, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("can't read response body : %w", err)
+	}
+
+	if response.StatusCode < exceptedStatusCode.Min || response.StatusCode >= exceptedStatusCode.Max {
+		return nil, &FailRequestError{Code: response.StatusCode, ResponseBody: data}
 	}
 
 	return data, nil

@@ -110,10 +110,6 @@ func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode Stat
 		return nil, fmt.Errorf("can't read response body : %w", err)
 	}
 
-	if err := response.Body.Close(); err != nil {
-		return nil, fmt.Errorf("can't close response body : %w", err)
-	}
-
 	return data, nil
 }
 

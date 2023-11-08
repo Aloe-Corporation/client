@@ -8,21 +8,21 @@ var (
 	instanciatedClient = make(map[string]*http.Client)
 )
 
-// ProxyFactoryHttpClient creates a new client if it does not exists in
+// ProxyFactoryHTTPClient creates a new client if it does not exists in
 // `instanciatedClient` map. If the client key is already defined, the
 // function returns the associated client.
-func ProxyFactoryHttpClient(key string) *http.Client {
+func ProxyFactoryHTTPClient(key string) *http.Client {
 	if c, ok := instanciatedClient[key]; ok {
 		return c
 	}
 
-	c := FactoryHttpClient()
+	c := FactoryHTTPClient()
 	instanciatedClient[key] = c
 
 	return c
 }
 
-// FactoryHttpClient returns a fresh new http.Client instance.
-func FactoryHttpClient() *http.Client {
+// FactoryHTTPClient returns a fresh new http.Client instance.
+func FactoryHTTPClient() *http.Client {
 	return &http.Client{}
 }

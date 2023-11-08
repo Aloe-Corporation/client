@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	// TICK_INTERVAL is interval between each request sent by the Ping() method.
-	TICK_INTERVAL = 50 * time.Millisecond
+	// tickInterval is interval between each request sent by the Ping() method.
+	tickInterval = 50 * time.Millisecond
 )
 
 var (
@@ -118,7 +118,7 @@ func (c *Connector) DoWithStatusCheck(req *http.Request, exceptedStatusCode Stat
 
 // Ping sends one ping every 50ms with timeout of t second, it ends if the ping is a success or timeout.
 func (c *Connector) Ping(t int) error {
-	ticker := time.NewTicker(TICK_INTERVAL)
+	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
 	timeout := time.After(time.Duration(t) * time.Second)
@@ -143,7 +143,7 @@ func FactoryConnector(config Conf) *Connector {
 	c := &Connector{
 		URL:          config.URL,
 		pingEndpoint: config.PingEndpoint,
-		Client:       FactoryHttpClient(),
+		Client:       FactoryHTTPClient(),
 	}
 
 	return c

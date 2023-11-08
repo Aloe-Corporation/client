@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/Aloe-Corporation/client/test"
-	"github.com/WeGetFunded-com/docker"
+	"github.com/Aloe-Corporation/docker"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,4 +1,3 @@
-// Package client will provide a reusable *http.Client with Let's Encrypt RootCAs for secured TLS connections
 package client
 
 import (
@@ -14,7 +13,6 @@ type Conf struct {
 	PingEndpoint string `yaml:"ping_endpoint"`
 }
 
-// Get a reusable *http.Client with Let's Encrypt RootCAs for secured TLS connections.
 func ProxyFactoryHttpClient(key string) *http.Client {
 	if c, ok := instanciatedClient[key]; ok {
 		return c

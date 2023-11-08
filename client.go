@@ -10,7 +10,8 @@ var (
 )
 
 type Conf struct {
-	URL string `yaml:"url"`
+	URL          string `yaml:"url"`
+	PingEndpoint string `yaml:"ping_endpoint"`
 }
 
 // Get a reusable *http.Client with Let's Encrypt RootCAs for secured TLS connections.

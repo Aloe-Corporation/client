@@ -35,7 +35,8 @@ type StatusCodeRange struct {
 
 type Connector struct {
 	*http.Client
-	URL string
+	URL          string
+	pingEndpoint string
 }
 
 // SimpleGet allow to use Connector.SimpleDo easily.
@@ -129,7 +130,7 @@ func (c *Connector) Ping(t int) error {
 	for {
 		select {
 		case <-ticker.C:
-			data, httpErr := c.SimpleGet("/")
+			data, httpErr := c.SimpleGet(c.pingEndpoint)
 			jsonErr := json.Unmarshal(data, &msg)
 
 			if httpErr == nil && jsonErr == nil && msg.Service != "" {
@@ -146,8 +147,9 @@ func (c *Connector) Ping(t int) error {
 // You MUST use *Connector.Ping() BEFORE using it.
 func FactoryConnector(config Conf) *Connector {
 	c := &Connector{
-		URL:    config.URL,
-		Client: FactoryHttpClient(),
+		URL:          config.URL,
+		pingEndpoint: config.PingEndpoint,
+		Client:       FactoryHttpClient(),
 	}
 
 	return c

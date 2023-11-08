@@ -17,7 +17,7 @@ The client module provides:
 - Infinite compatibility because it embed a native `net/http` client
 - Proxy of instanciated clients
 
-## Concept
+## Concepts
 
 ### One client by target
 

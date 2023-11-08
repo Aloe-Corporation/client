@@ -1,4 +1,3 @@
-// Package client will provide a reusable *http.Client with Let's Encrypt RootCAs for secured TLS connections
 package client
 
 import (
@@ -9,11 +8,9 @@ var (
 	instanciatedClient = make(map[string]*http.Client)
 )
 
-type Conf struct {
-	URL string `yaml:"url"`
-}
-
-// Get a reusable *http.Client with Let's Encrypt RootCAs for secured TLS connections.
+// ProxyFactoryHttpClient creates a new client if it does not exists in
+// `instanciatedClient` map. If the client key is already defined, the
+// function returns the associated client.
 func ProxyFactoryHttpClient(key string) *http.Client {
 	if c, ok := instanciatedClient[key]; ok {
 		return c
@@ -25,6 +22,7 @@ func ProxyFactoryHttpClient(key string) *http.Client {
 	return c
 }
 
+// FactoryHttpClient returns a fresh new http.Client instance.
 func FactoryHttpClient() *http.Client {
 	return &http.Client{}
 }

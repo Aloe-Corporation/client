@@ -2,29 +2,48 @@ package client
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-type testProxyFactoryHttpClient struct {
-	key           string
-	isInstanciate bool
-}
+func TestProxyFactoryHttpClient(t *testing.T) {
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		newClient bool
+	}{
+		{
+			name: "Success case: new client",
+			args: args{
+				key: "c1",
+			},
+			newClient: true,
+		},
+		{
+			name: "Success case: already instanciated client ",
+			args: args{
+				key: "c0",
+			},
+			newClient: false,
+		},
+	}
 
-var testProxyFactoryHttpClientData = []testProxyFactoryHttpClient{
-	{ // Success case
-		key:           "c1",
-		isInstanciate: true,
-	},
-	{ // test a second time with the same client name
-		key:           "c1",
-		isInstanciate: true,
-	},
-}
+	// Instanciate a client before test run
+	instanciatedClient["c0"] = FactoryHttpClient()
 
-func TestFactoryHttpClient(t *testing.T) {
-	for _, d := range testProxyFactoryHttpClientData {
-		c := ProxyFactoryHttpClient(d.key)
-		assert.NotZero(t, d.isInstanciate, c != nil)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ProxyFactoryHttpClient(tt.args.key)
+			if tt.newClient {
+				if got == instanciatedClient["c0"] {
+					t.Errorf("ProxyFactoryHttpClient() = %v, should be a new client but was equal to already instanciated one.", got)
+				}
+			} else {
+				if got == nil {
+					t.Errorf("ProxyFactoryHttpClient() = %v, client should not be nil", got)
+				}
+			}
+		})
 	}
 }

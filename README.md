@@ -77,4 +77,8 @@ fmt.Println(string(responseBody))
 
 ## Contributing
 
-## Licence
+This section will be added soon.
+
+## License
+
+Client is released under the MIT license. See [LICENSE.txt](./LICENSE).

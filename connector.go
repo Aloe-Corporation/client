@@ -14,14 +14,14 @@ const (
 )
 
 var (
-	// DefaultStatusRange that encompass most of all cases.
+	// DefaultStatusRange that encompass most of all success HTTP status code cases.
 	DefaultStatusRange = StatusCodeRange{
 		Min: http.StatusOK,
 		Max: http.StatusBadRequest,
 	}
 )
 
-// Conf for the client. All parameters are required.
+// Conf for the connector. All parameters are required.
 type Conf struct {
 	URL          string `yaml:"url"`           // Base url of the target HTTP server such as https://myserver.com
 	PingEndpoint string `yaml:"ping_endpoint"` // Path of the ping endpoint of the target HTTP server
@@ -36,9 +36,9 @@ type StatusCodeRange struct {
 }
 
 // Connector is a supercharged HTTP client.
-// It embed a native http.Client so it can be used as native client.
+// It embeds a native http.Client so it can be used as native client.
 type Connector struct {
-	*http.Client        // Natice http client
+	*http.Client        // Native http client
 	URL          string // Base url of the target HTTP server such as https://myserver.com
 	pingEndpoint string // Path of the ping endpoint of the target HTTP server
 }
@@ -80,7 +80,7 @@ func (c *Connector) SimpleDo(method, path string, body io.Reader) ([]byte, error
 
 // DoWithHeader  eases the Connector.DoWithStatusCheck use.
 // You have to specify the method, the path, the header, the body, the excepted status range.
-// The excepted status range Min will be included and Max will be excluded
+// The excepted status range Min will be included and Max will be excluded.
 func (c *Connector) DoWithHeader(method, path string, header *http.Header, body io.Reader, exceptedStatusCode StatusCodeRange) ([]byte, error) {
 	req, err := http.NewRequestWithContext(context.Background(), method, c.URL+path, body)
 	if err != nil {
@@ -137,7 +137,7 @@ func (c *Connector) Ping(t int) error {
 	}
 }
 
-// FactoryConnector instantiate and return a *Connector.
+// FactoryConnector instantiates and returns a *Connector.
 // Call *Connector.Ping() to ensure that the target API is available.
 func FactoryConnector(config Conf) *Connector {
 	c := &Connector{

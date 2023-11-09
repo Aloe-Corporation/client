@@ -6,7 +6,7 @@ that `net/http` module creates when dealing with multiple API calls.
 This project has been developped by the [Aloe](https://www.aloe-corp.com/) team and is now open source.
 
 ![tests](https://github.com/Aloe-Corporation/client/actions/workflows/go.yml/badge.svg)
-
+[![Go Reference](https://pkg.go.dev/badge/github.com/Aloe-Corporation/client.svg)](https://pkg.go.dev/github.com/Aloe-Corporation/client)
 ## Overview
 
 Client supercharge the native http client.
